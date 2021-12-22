@@ -74,7 +74,7 @@ The next section introduces Cloudflare to fix these issues.
 
 #### <a name='4.0'>Overview</a>
 
-Its advantageous to have all the traffic to pass through a "value layer" that provides security, caching, and other features.  Although many cloud providers offer the same features, Cloudflare was easy set up and is [best in class](https://blog.cloudflare.com/cloudflare-traffic) as, the time of this writing, their server handle [10 trillion requests every month](https://blog.cloudflare.com/cloudflare-traffic). 
+Its advantageous to have all the traffic to pass through a "value layer" that provides security, caching, and other features.  Although many cloud providers offer the same features, Cloudflare was easy set up and is [best in class](https://blog.cloudflare.com/cloudflare-traffic).  At the time of this writing, their servers handle [10 trillion requests](https://blog.cloudflare.com/cloudflare-traffic) every month. 
 
 At a high level, in order for traffic to be *forced* through Cloudflare two things needed to be done.
 
