@@ -72,7 +72,7 @@ The next section introduces Cloudflare to fix these issues.
 
 ### <a name='4'>Configuring Cloudflare in Front</a>
 
-##### <a name='4.0'>Overview</a>
+#### <a name='4.0'>Overview</a>
 
 Its advantageous to have all the traffic to pass through a "value layer" that provides security, caching, and other features.  Although many cloud providers offer the same features, Cloudflare was easy set up and is [best in class](https://blog.cloudflare.com/cloudflare-traffic) as, the time of this writing, their server handle [10 trillion requests every month](https://blog.cloudflare.com/cloudflare-traffic). 
 
@@ -81,7 +81,7 @@ At a high level, in order for traffic to be *forced* through Cloudflare two thin
 1. DNS management for the domain must be transferred from GoDaddy to Cloudflare.  
 2. In Azure, set the blob service created earlier to accept traffic *only* from Cloudflare servers.  
 
-##### <a name='4.1'>DNS Management Transfer to Cloudflare</a>
+#### <a name='4.1'>DNS Management Transfer to Cloudflare</a>
 
 With a free account on Cloudflare in place, the following steps were followed to set up Cloudflare as a proxy. 
 
@@ -115,7 +115,7 @@ At this point, the outstanding issues were as follows.
 2. Navigation to the [Azure static website address](https://staticwebsitecloudflare.z13.web.core.windows.net) to see the site still worked.
 3. The [necessary security headers](./src/images/46.png) to score an acceptable rating on [securityheaders.io](https://securityheaders.com/) were not set.
 
-##### <a name='4.2'>Page Rules - Forwarding</a>
+#### <a name='4.2'>Page Rules - Forwarding</a>
 
 To fix the first issue, what Cloudflare calls [Page Rules](https://developers.cloudflare.com/rules/) were used.  Two rules were put in place that allowed for the [forwarding traffic, originally destined for the root domain, to go to the `www` subdomain](./src/images/47.png).  This was basically the same thing done in GoDaddy.  In the end there were [two redirect rules](./src/images/48.png) for HTTP and HTTPS.  The root domain however still did *not* work and this is because there was no `A` record.  In [Cloudflare DNS settings](./src/images/49.png) it made sense to use the pooled IP address from Azure, which in this case was `104.21.3.7`.  This entry did *not* need to be proxied so the **Proxy state** was set to **DNS only**.
 	> nslookup
@@ -141,11 +141,11 @@ At this point the following URLs were tested.  Chrome was used with a new Incogn
 
 All requests worked and used HTTPS regardless if HTTP was specified.
 
-##### <a name='4.3'>Accept Traffic from Cloudflare Only</a>
+#### <a name='4.3'>Accept Traffic from Cloudflare Only</a>
 
 At this point, the website could still be reached using the Azure static website URL of [`https://staticwebsitecloudflare.z13.web.core.windows.net/`](https://staticwebsitecloudflare.z13.web.core.windows.net).  This bypassed Cloudflare defeating its purpose.  Fortunately in Azure, on the [**Firewalls and virtual network** tab under the **Networking** blade](./src/images/55.png) for the blob service, a whitelist of accepted IP addresses can be specified.  [Cloudflare publishes their IP addresses](https://www.cloudflare.com/ips/) which were used in this configuration.  Once the Cloudflare IP address restrictions were in place, it was *not* possible [to reach the website](./src/images/56.png) using the Azure static website URL of [`https://staticwebsitecloudflare.z13.web.core.windows.net`](https://staticwebsitecloudflare.z13.web.core.windows.net).  The URLs tested in the last section still still worked after these changes. 
 
-##### <a name='4.4'>Transform Rules</a>
+#### <a name='4.4'>Transform Rules</a>
 
 The final problem that needed to be fixed was the [F security score](./src/images/57.png) from [securityheaders.io](https://securityheaders.com/?q=https%3A%2F%2Fstaticwebsitecloudflare.site&followRedirects=on).  Cloudflare's Transform rules allowed for the specification of HTTP headers to returned given certain conditions.  [This graphic](./src/images/58.png) shows that, given an HTTP GET or POST as request method, the following HTTP response headers are configured to be returned as part of the HTTP response.
 
