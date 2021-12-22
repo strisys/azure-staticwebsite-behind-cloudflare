@@ -85,8 +85,8 @@ At a high level, in order for traffic to be *forced* through Cloudflare two thin
 
 With a free account on Cloudflare in place, the following steps were followed to set up Cloudflare as a proxy. 
 
-1. The first step was to [add the site](./src/images/29.png).  It was [at this point, the URL for the custom domain](./src/images/30.png) set up in the last section, was specified and [the free plan as chosen](./src/images/31.png).  From there, Cloudflare [read the GoDaddy DNS records for purposes of import](./src/images/32.png).  During the review only [the CNAME record pointing to our Azure static website domain was kept](./src/images/33.png).  Recall the first two `A` records were for the GoDaddy forwarding service and those were no longer needed.  
-2. The next step was to [switch to using Cloudflare's nameservers](./src/images/34.png).  This involved logging back into the GoDaddy portal and [changing the nameservers](./src/images/35.png) to those [provided by Cloudflare](./src/images/34.png).  GoDaddy [issued a warning](./src/images/36.png) for this change.  After making this change *only* [Cloudflare's nameservers](./src/images/37.png) could be seen.  All DNS records were cleared as that was now being managed by Cloudflare.  Also once complete [Cloudflare checked](./src/images/38.png) that the nameservers have been changed successfully.
+1. The first step was to [add the site](./src/images/29.png).  It was [at this point, the URL for the custom domain](./src/images/30.png) set up in the last section, was specified and [the free plan as chosen](./src/images/31.png).  From there, Cloudflare [read the GoDaddy DNS records for purposes of import](./src/images/32.png).  During the review only [the CNAME record pointing to our Azure static website domain was kept](./src/images/33.png).  Recall records like the first two `A` records were for the GoDaddy forwarding service and that was no longer being used.  
+2. The next step was to [switch to using Cloudflare's nameservers](./src/images/34.png).  This involved logging back into the GoDaddy portal and [changing the nameservers](./src/images/35.png) in the DNS settings to those [provided by Cloudflare](./src/images/34.png).  Note that GoDaddy [issued a warning](./src/images/36.png) for this change.  After making this change *only* [Cloudflare's nameservers](./src/images/37.png) could be seen.  All DNS records were cleared as DSN now being managed by Cloudflare.  Also once complete [Cloudflare checked](./src/images/38.png) that the nameservers have been changed successfully.
 3. At this point Cloudflare presented some [configuration recommendations](./src/images/39.png) such as [enabling HTTPS and minification](./src/images/40.png) of static website assets. Both [options](./src/images/41.png) were enabled.  It should *not* go unnoticed as these are two significant features being given for free.  Cloudflare is going to manage a valid TLS certificate and minify files thereby reducing effort and cost.
 
 This was it for the *initial setup*.  Shortly after setup (i.e. less than `60 seconds`) an `nslookup` was run to see that Cloudflare's nameservers were being used.
@@ -117,7 +117,7 @@ At this point, the outstanding issues were as follows.
 
 #### <a name='4.2'>Page Rules - Forwarding</a>
 
-To fix the first issue, what Cloudflare calls [Page Rules](https://developers.cloudflare.com/rules/) were used.  Two rules were put in place that allowed for the [forwarding traffic, originally destined for the root domain, to go to the `www` subdomain](./src/images/47.png).  This was basically the same thing done in GoDaddy.  In the end there were [two redirect rules](./src/images/48.png) for HTTP and HTTPS.  The root domain however still did *not* work and this is because there was no `A` record.  In [Cloudflare DNS settings](./src/images/49.png) it made sense to use the pooled IP address from Azure, which in this case was `104.21.3.7`.  This entry did *not* need to be proxied so the **Proxy state** was set to **DNS only**.
+To fix the *first* issue list above, what Cloudflare calls [Page Rules](https://developers.cloudflare.com/rules/) were used and what those are are best explained [here](https://developers.cloudflare.com/rules/).  Two rules were put in place that allowed for the [forwarding traffic, originally destined for the root domain, to go to the `www` subdomain](./src/images/47.png).  This was basically the same thing done in GoDaddy.  In the end there were [two redirect rules](./src/images/48.png) for HTTP and HTTPS.  The root domain however still did *not* work and this is because there was no `A` record.  In [Cloudflare DNS settings](./src/images/49.png) it made sense to use the pooled IP address from Azure, which in this case was `104.21.3.7`.  This entry did *not* need to be proxied so the **Proxy state** was set to **DNS only**.
 	> nslookup
 	...
 	
@@ -127,10 +127,10 @@ To fix the first issue, what Cloudflare calls [Page Rules](https://developers.cl
 
 Once the specified address was returned from an `nslookup` command, a couple of more steps were necessary and these were somewhat *tricky*.  
 
-1. In the Cloudflare DNS settings, the **Proxy status** for the `CNAME` record was set to **DNS only**.  The was *temporary* and the reason was to re-verify the CNAME record from Azure like was done with GoDaddy.  This would *not* work if the **Proxy status** toggle is set to **Proxied**.  
+1. In the Cloudflare DNS settings, the **Proxy status** for the `CNAME` record was set from **Proxied** to **DNS only**.  The was *temporary* and the reason was to re-verify the CNAME record from Azure like was done with GoDaddy.  This would *not* work if the **Proxy status** toggle is set to **Proxied**.  
 2. In Azure, the CNAME was re-verified using [Custom tab of the Network blade in the storage account](./src/images/52.png).  The previous entry had to be first cleared, saved, and then reapplied.  
-3. While in Azure, HTTP traffic was also allowed using the [Configuration blade and disable Secure transfer required](./src/images/53.png).  The idea was that traffic from Cloudflare is clean and did *not* require encryption.  
-4. Finally, the toggle set in Step #1 was reversed so the [**Proxy status** in Cloudflare DNS for the CNAME record was back to proxied](./src/images/54.png).
+3. While in Azure, HTTP traffic was also allowed using the [Configuration blade and disable Secure transfer required](./src/images/53.png).  The idea was that traffic from Cloudflare to Azure is unlikely to be attacked.
+4. Finally, the toggle set in Step #1 was reversed so the [**Proxy status** in Cloudflare DNS for the CNAME record was set back **Proxied** from **DNS Only**](./src/images/54.png).
 
 At this point the following URLs were tested.  Chrome was used with a new Incognito instance with the browner DNS cache cleared for good measure at [chrome://net-internals/#dns](chrome://net-internals/#dns).
 
@@ -139,15 +139,15 @@ At this point the following URLs were tested.  Chrome was used with a new Incogn
 - [`http://staticwebsitecloudflare.site`](http://staticwebsitecloudflare.site)
 - [`https://www.staticwebsitecloudflare.site`](https://www.staticwebsitecloudflare.site)
 
-All requests worked and used HTTPS regardless if HTTP was specified.
+All requests worked and used HTTPS regardless whether it was specified or not.
 
 #### <a name='4.3'>Accept Traffic from Cloudflare Only</a>
 
-At this point, the website could still be reached using the Azure static website URL of [`https://staticwebsitecloudflare.z13.web.core.windows.net/`](https://staticwebsitecloudflare.z13.web.core.windows.net).  This bypassed Cloudflare defeating its purpose.  Fortunately in Azure, on the [**Firewalls and virtual network** tab under the **Networking** blade](./src/images/55.png) for the blob service, a whitelist of accepted IP addresses can be specified.  [Cloudflare publishes their IP addresses](https://www.cloudflare.com/ips/) which were used in this configuration.  Once the Cloudflare IP address restrictions were in place, it was *not* possible [to reach the website](./src/images/56.png) using the Azure static website URL of [`https://staticwebsitecloudflare.z13.web.core.windows.net`](https://staticwebsitecloudflare.z13.web.core.windows.net).  The URLs tested in the last section still still worked after these changes. 
+At this point, the website could still be reached using the Azure static website URL of [`https://staticwebsitecloudflare.z13.web.core.windows.net/`](https://staticwebsitecloudflare.z13.web.core.windows.net).  This bypassed Cloudflare thereby defeating its purpose.  Fortunately in Azure, on the [**Firewalls and virtual network** tab under the **Networking** blade](./src/images/55.png) for the blob service, a whitelist of accepted IP addresses can be specified.  [Cloudflare publishes their IP addresses](https://www.cloudflare.com/ips/) which were used in this configuration.  Once the Cloudflare IP address restrictions were in place, it was *not* possible [to reach the website](./src/images/56.png) using the Azure static website URL of [`https://staticwebsitecloudflare.z13.web.core.windows.net`](https://staticwebsitecloudflare.z13.web.core.windows.net).  The URLs tested in the last section still still worked after these changes. 
 
 #### <a name='4.4'>Transform Rules</a>
 
-The final problem that needed to be fixed was the [F security score](./src/images/57.png) from [securityheaders.io](https://securityheaders.com/?q=https%3A%2F%2Fstaticwebsitecloudflare.site&followRedirects=on).  Cloudflare's Transform rules allowed for the specification of HTTP headers to returned given certain conditions.  [This graphic](./src/images/58.png) shows that, given an HTTP GET or POST as request method, the following HTTP response headers are configured to be returned as part of the HTTP response.
+The final problem that needed to be fixed was the low [security header score](./src/images/57.png) from [securityheaders.io](https://securityheaders.com/?q=https%3A%2F%2Fstaticwebsitecloudflare.site&followRedirects=on).  [Cloudflare's Transform rules](https://developers.cloudflare.com/rules/transform) allowed for the specification of HTTP headers to be returned given certain conditions.  [This graphic](./src/images/58.png) shows that, given an `HTTP GET` or `HTTP POST` as request method, the following HTTP response headers are configured to be returned as part of the HTTP response.
 
 - `Content-Security-Policy = upgrade-insecure-requests`
 - `Permissions-Policy = geolocation=(self), microphone=()`
@@ -156,18 +156,18 @@ The final problem that needed to be fixed was the [F security score](./src/image
 - `X-Content-Type-Options = nosniff`
 - `X-Frame-Options = DENY`
 
-After setting these security header values, the score from [securityheaders.io](https://securityheaders.com/?q=https%3A%2F%2Fstaticwebsitecloudflare.site&followRedirects=on) was [an `A+`](./src/images/59.png).
+After setting these security header values, the score from [securityheaders.io](https://securityheaders.com/?q=https%3A%2F%2Fstaticwebsitecloudflare.site&followRedirects=on) was [acceptable](./src/images/59.png).
 
 ### <a name='5'>Summary</a>
 
 In the Overview, the original requirements were as follows.
 
-- *No public access* via API or directory browsing to website static assets
+- *No public access* via API or directory browsing to website assets
 - Assets must be served over HTTPS
-- A custom domain is the only way to reach the site 
-- The proper security headers will be put in place and tested using [securityheaders.io](https://securityheaders.com/).  The required score is `A+`.
+- A custom domain is the *only* way to reach the site 
+- The proper security headers will be put in place and [tested](https://securityheaders.com/) to meet standards.  
 - Assets can be cached and minified *without the need* for a complex build process.
 
-All these were satisfied including caching which has *not* yet been discussed.  Cloudflare has a [caching configuration](./src/images/60.png) that [optimizes delivery of website files](https://developers.cloudflare.com/cache) to the target.  When debugging or deploying a site, however, it might be best to [disable caching on the **Overview**](./src/images/61.png) blade to ensure updated assets are returned and not the cached versions.  
+All these were satisfied including caching which has *not* yet been discussed.  Cloudflare has a [caching configuration](./src/images/60.png) that [optimizes delivery of website files](https://developers.cloudflare.com/cache) to target clients all around the world.  When debugging or deploying a site, however, it might be best to [disable caching on the **Overview**](./src/images/61.png) blade to ensure updated assets are returned and not the cached versions.  
 
-In summary, the combination of [Azure Static Websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) and [Cloudflare](https://www.cloudflare.com/) are a great choice meet the requirements for most static websites.  Of course, DevOps can be put in place as well that will allow for assets to be deployed given a push to a Git repository, for example, but that was beyond the scope of this investigation.
+In summary, the combination of [Azure Static Websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) and [Cloudflare](https://www.cloudflare.com/) were a great choice meet the requirements for most static websites.  Of course, DevOps can be put in place as well that will allow for assets to be deployed given a push to a Git repository, for example, but that was beyond the scope of this investigation.
