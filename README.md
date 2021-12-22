@@ -17,29 +17,29 @@
 
 ### <a name='1'>Overview</a>
 
-As part of [Azure blob storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction) exists the capability to host [static websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website).  In combination with features from [Cloudflare](https://www.cloudflare.com/), there exists a maintainable, performant, secure, and low cost option for serving static content as this document is meant to determine.  Below are some typical requirements for a company website that consists of only static assets.
+As part of [Azure blob storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction) exists the capability to host [static websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website).  In combination with features from [Cloudflare](https://www.cloudflare.com/), there exists a maintainable, performant, secure, and low cost option for serving static content as this document is meant to prove.  Below are some typical requirements for a company website that consists of only static assets.
 
 - *No public access* via API or directory browsing to website assets
 - Assets must be served over HTTPS
-- A custom domain is the only way to reach the site 
-- The proper security headers will be put in place and tested using [securityheaders.io](https://securityheaders.com/). 
+- A custom domain is the *only* way to reach the site 
+- The proper security headers will be put in place and [tested](https://securityheaders.com/) to meet standards.  
 - Assets can be cached and minified *without the need* for a complex build process.
 
-The steps in this analysis detail that which was performed to set everything up ranging from the purchase of a domain through [GoDaddy](https://www.godaddy.com/) to configuration of both [Azure static websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) and [Cloudflare](https://www.cloudflare.com/) to determine if the specified requirements could be satisfied.  Note that the screenshots used in the hyperlinks in this page will deviate from the actual service provider screens over time.
+The steps in this page detail that which was performed to set everything up ranging from the purchase of a domain through [GoDaddy](https://www.godaddy.com/) to configuration of both [Azure static websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) and [Cloudflare](https://www.cloudflare.com/) to determine if the specified requirements could be satisfied.  Note that the screenshots used in the hyperlinks in this page where created on `December 21st, 2021` and will deviate from the actual service provider screens over time.
 
 ### <a name='2'>Azure Static Website Setup</a>
 
 #### <a name='2.1'>Creating a Storage Account</a>
 
-With an Azure subscription in place, a [storage account was created](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal)  [Azure portal](https://portal.azure.com/) which is a required step for using [Azure static websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website).  In the [portal](https://portal.azure.com/) the following steps were performed to do this.  
+With an Azure subscription in place, a [storage account was created](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal)  [Azure portal](https://portal.azure.com/) which is an obvious required step for using [Azure static websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website).  Though there are many ways to create a storage account, the steps below using the [portal](https://portal.azure.com/) were what was used.
 
-1. Clicked [**+ Create a resource**](./src/images/1.png) in the upper left-hand corner.
+1. In the [Azure portal](https://portal.azure.com/), clicked [**+ Create a resource**](./src/images/1.png) in the upper left-hand corner.
 2. Entered [`storage account`](./src/images/2.png) in the search box and clicked [**Create**](./src/images/3.png) on the following page.
 3. On the [**Basics**](./src/images/4.png) blade entered information like a resource group put this resource in and a *unique* storage account name.  Other options like [redundancy](https://docs.microsoft.com/en-us/azure/storage/common/storage-redundancy) could be changed later so no other configuration was necessary here.
 
 #### <a name='2.2'>Enabling Azure Static Website</a>
 
-Once the storage account was [created](./src/images/6.png), the ability to enable [static websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) was available from the **Static website** blade.  A [not authorized message on this Static website blade](./src/images/7.png) was be observed requiring some blob access modifications in accordance with [this graphic](./src/images/8.png).  Once authorized, static websites were enabled by simply by [toggling it on](./src/images/9.png), entering the name of index document (e.g. `index.html`), and [choosing Save](./src/images/9.png).  The [URL of static website](./src/images/9.png) was be displayed (i.e. `https://staticwebsitecloudflare.z13.web.core.windows.net`) as a result.  
+Once the storage account was [created](./src/images/6.png), the ability to enable [static websites](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website) was available from the **Static website** blade.  (*NOTE: A [not authorized message on this Static website blade](./src/images/7.png) was be observed requiring some blob access modifications in accordance with [this graphic](./src/images/8.png)*).  Static websites were enabled by simply by [toggling it on](./src/images/9.png), entering the name of index document (e.g. `index.html`), and [choosing Save](./src/images/9.png).  The [URL of static website](./src/images/9.png) was be displayed (i.e. `https://staticwebsitecloudflare.z13.web.core.windows.net`) as a result.  
 
 #### <a name='2.3'>Uploading Static Website Assets</a>
 
