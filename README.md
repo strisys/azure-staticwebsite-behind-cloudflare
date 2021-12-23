@@ -118,6 +118,7 @@ At this point, the outstanding issues were as follows.
 #### <a name='4.2'>Page Rules - Forwarding</a>
 
 To fix the *first* issue list above, what Cloudflare calls [Page Rules](https://developers.cloudflare.com/rules/) were used and what those are are best explained [here](https://developers.cloudflare.com/rules/).  Two rules were put in place that allowed for the [forwarding traffic, originally destined for the root domain, to go to the `www` subdomain](./src/images/47.png).  This was basically the same thing done in GoDaddy.  In the end there were [two redirect rules](./src/images/48.png) for HTTP and HTTPS.  The root domain however still did *not* work and this is because there was no `A` record.  In [Cloudflare DNS settings](./src/images/49.png) it made sense to use the pooled IP address from Azure, which in this case was `104.21.3.7`.  This entry did *not* need to be proxied so the **Proxy state** was set to **DNS only**.
+
 	> nslookup
 	...
 	
